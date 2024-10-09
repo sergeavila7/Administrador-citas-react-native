@@ -1,11 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView, StyleSheet, Text, Pressable, Modal} from 'react-native';
 
 const App = (): JSX.Element => {
+  const [modalVisible, setModalVisible] = useState(false);
+
   const {container, title, titleBold, btnNewDate, btnTextNewDate} = styles;
+
   const newDateHandler = () => {
-    console.log('Click');
-  };
+
+    setModalVisible(true)
+    };
+
   return (
     <SafeAreaView style={container}>
       <Text style={title}>Administrador de Citas</Text>
@@ -13,7 +18,7 @@ const App = (): JSX.Element => {
       <Pressable onPress={newDateHandler} style={btnNewDate}>
         <Text style={btnTextNewDate}>Nueva Cita</Text>
       </Pressable>
-      <Modal animationType="slide" visible={false}>
+      <Modal animationType="slide" visible={modalVisible}>
         <Text>Desde modal</Text>
       </Modal>
     </SafeAreaView>
