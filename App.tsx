@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {SafeAreaView, StyleSheet, Text, Pressable, Modal} from 'react-native';
+import {Form} from './src/components/index';
 
 const App = (): JSX.Element => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -7,9 +8,8 @@ const App = (): JSX.Element => {
   const {container, title, titleBold, btnNewDate, btnTextNewDate} = styles;
 
   const newDateHandler = () => {
-
-    setModalVisible(true)
-    };
+    setModalVisible(true);
+  };
 
   return (
     <SafeAreaView style={container}>
@@ -18,9 +18,7 @@ const App = (): JSX.Element => {
       <Pressable onPress={newDateHandler} style={btnNewDate}>
         <Text style={btnTextNewDate}>Nueva Cita</Text>
       </Pressable>
-      <Modal animationType="slide" visible={modalVisible}>
-        <Text>Desde modal</Text>
-      </Modal>
+      <Form modalVisible={modalVisible} />
     </SafeAreaView>
   );
 };
