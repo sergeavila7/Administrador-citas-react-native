@@ -2,8 +2,18 @@ import React, {useState} from 'react';
 import {SafeAreaView, StyleSheet, Text, Pressable, Modal} from 'react-native';
 import {Form} from './src/components/index';
 
+interface Patient {
+  patient: string;
+  owner: string;
+  phone: string;
+  date: Date;
+  email: string;
+  symptoms: string;
+}
+
 const App = (): JSX.Element => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]); // Tipo explícito 'Patient[]'
 
   const {container, title, titleBold, btnNewDate, btnTextNewDate} = styles;
 
@@ -18,7 +28,12 @@ const App = (): JSX.Element => {
       <Pressable onPress={newDateHandler} style={btnNewDate}>
         <Text style={btnTextNewDate}>Nueva Cita</Text>
       </Pressable>
-      <Form modalVisible={modalVisible} />
+      <Form
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        patients={patients}
+        setPatients={setPatients}
+      />
     </SafeAreaView>
   );
 };

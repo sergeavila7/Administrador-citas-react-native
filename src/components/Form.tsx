@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {Dispatch, FC, SetStateAction, useState} from 'react';
 import {
   Text,
   Modal,
@@ -7,26 +7,77 @@ import {
   View,
   TextInput,
   ScrollView,
+  Pressable,
+  Alert,
 } from 'react-native';
+import DatePicker from 'react-native-date-picker';
+interface Patient {
+  patient: string;
+  owner: string;
+  phone: string;
+  date: Date;
+  email: string;
+  symptoms: string;
+}
 
 interface FormProps {
   modalVisible: boolean;
+  setModalVisible: Dispatch<SetStateAction<boolean>>;
+  patients: Patient[];
+  setPatients: Dispatch<SetStateAction<Patient[]>>;
 }
 
-export const Form: FC<FormProps> = ({modalVisible}) => {
-  const {title, titleBold, container, input, field, label} = styles;
-  const [data, setData] = useState({
+export const Form: FC<FormProps> = ({
+  modalVisible,
+  setModalVisible,
+  patients,
+  setPatients,
+}) => {
+  const {
+    title,
+    titleBold,
+    container,
+    input,
+    field,
+    label,
+    containerDate,
+    btnNewDate,
+    btnNewDateText,
+    btnCalcel,
+    btnCalcelText,
+  } = styles;
+
+  const [data, setData] = useState<Patient>({
     patient: '',
     owner: '',
     phone: '',
+    date: new Date(),
     email: '',
     symptoms: '',
   });
 
-  const handleChange = (fieldName: keyof typeof data) => (text: string) => {
-    setData(prevForm => ({...prevForm, [fieldName]: text}));
+  const handleChange = (fieldName: keyof Patient) => (value: any) => {
+    setData(prevForm => ({
+      ...prevForm,
+      [fieldName]: fieldName === 'date' ? new Date(value) : value, // Si es 'date', pasamos el objeto Date tal cual
+    }));
   };
-  console.log(data);
+
+  const handleDate = () => {
+    const missingFields = Object.keys(data).filter(
+      key => !data[key as keyof Patient] && key !== 'date', // No validar 'date' por ser un objeto Date
+    );
+
+    if (missingFields.length > 0) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+    } else {
+      const newPatient: Patient = {
+        ...data,
+      };
+      setPatients([...patients, newPatient]);
+      setModalVisible(false);
+    }
+  };
 
   return (
     <Modal animationType="slide" visible={modalVisible}>
@@ -35,6 +86,9 @@ export const Form: FC<FormProps> = ({modalVisible}) => {
           <Text style={title}>
             Nueva <Text style={titleBold}>Cita</Text>
           </Text>
+          <Pressable style={btnCalcel} onPress={() => setModalVisible(false)}>
+            <Text style={btnCalcelText}>X Cancelar</Text>
+          </Pressable>
           <View style={field}>
             <Text style={label}>Nombre paciente</Text>
             <TextInput
@@ -74,6 +128,16 @@ export const Form: FC<FormProps> = ({modalVisible}) => {
             />
           </View>
           <View style={field}>
+            <Text style={label}>Fecha Alta</Text>
+            <View style={containerDate}>
+              <DatePicker
+                date={data.date}
+                locale="es"
+                onDateChange={handleChange('date')}
+              />
+            </View>
+          </View>
+          <View style={field}>
             <Text style={label}>Sintomas</Text>
             <TextInput
               style={input}
@@ -84,6 +148,9 @@ export const Form: FC<FormProps> = ({modalVisible}) => {
               numberOfLines={4}
             />
           </View>
+          <Pressable style={btnNewDate} onPress={handleDate}>
+            <Text style={btnNewDateText}>Agregar paciente</Text>
+          </Pressable>
         </ScrollView>
       </SafeAreaView>
     </Modal>
@@ -107,5 +174,34 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     color: 'black',
+  },
+  containerDate: {
+    borderRadius: 10,
+  },
+  btnCalcel: {
+    backgroundColor: '#5827A4',
+    marginTop: 15,
+    paddingVertical: 15,
+    marginHorizontal: 30,
+    borderRadius: 10,
+  },
+  btnCalcelText: {
+    color: '#FFF',
+    textAlign: 'center',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  btnNewDate: {
+    backgroundColor: '#F59E0B',
+    marginTop: 15,
+    paddingVertical: 15,
+    marginHorizontal: 30,
+    borderRadius: 10,
+  },
+  btnNewDateText: {
+    color: '#FFF',
+    textAlign: 'center',
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
 });
