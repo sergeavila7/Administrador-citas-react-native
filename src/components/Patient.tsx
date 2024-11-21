@@ -8,11 +8,12 @@ interface PatientProps {
     date: Date;
   };
   setModalVisible: (visible: boolean) => void;
-  patientEdit: (id: number) => void; // Definimos la función patientEdit con el tipo adecuado
+  patientEdit: (id: number) => void;
+  patientDelete: (id: number) => void;
 
 }
 
-const Patient = ({ item, patientEdit, setModalVisible }: PatientProps) => {
+const Patient = ({ item, patientEdit, patientDelete, setModalVisible }: PatientProps) => {
   const { container, label, text, dateText, btn, btnEdit, btnDelete, btnText, containerBtns } = styles;
   const { patient, date, id } = item;
 
@@ -33,7 +34,10 @@ const Patient = ({ item, patientEdit, setModalVisible }: PatientProps) => {
       <Text style={text}>{patient}</Text>
       <Text style={dateText}>{formatDate(date)}</Text>
       <View style={containerBtns}><Pressable style={[btn, btnEdit]} onLongPress={() => { patientEdit(id), setModalVisible(true) }}><Text style={btnText}>Editar</Text></Pressable>
-        <Pressable style={[btn, btnDelete]}><Text style={btnText}>Eliminar</Text></Pressable></View>
+        <Pressable style={[btn, btnDelete]} onPress={() => patientDelete(id)}>
+          <Text style={btnText}>Eliminar</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

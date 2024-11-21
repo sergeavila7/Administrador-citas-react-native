@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
   FlatList,
+  Alert,
 } from 'react-native';
 import { Form } from './src/components/index';
 import Patient from './src/components/Patient';
@@ -50,9 +51,20 @@ const App = (): JSX.Element => {
   const patientEdit = (id: number) => {
     const patientEdit = patients.filter(patient => patient.id === id)
     setPatient(patientEdit[0])
-    console.log('patient ....', patientEdit);
-
   }
+
+  const patientDelete = (id: number) => {
+    Alert.alert(
+      'Deseas eliminar este paciente?',
+      'Un paciente eliminado no se puede eliminar',
+      [{ text: 'Cancelar' }, {
+        text: 'Si, Eliminar', onPress: () => {
+          const updatedPatients = patients.filter(patient => patient.id !== id);
+          setPatients(updatedPatients);
+        }
+      }]
+    )
+  };
 
   return (
     <SafeAreaView style={container}>
@@ -69,7 +81,11 @@ const App = (): JSX.Element => {
           data={patients}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }: { item: Patient }) => {
-            return <Patient item={item} patientEdit={patientEdit} setModalVisible={setModalVisible} />;
+            return <Patient
+              item={item}
+              patientEdit={patientEdit}
+              patientDelete={patientDelete}
+              setModalVisible={setModalVisible} />;
           }}
         />
       )}

@@ -28,7 +28,7 @@ interface FormProps {
   patients: Patient[];
   setPatients: Dispatch<SetStateAction<Patient[]>>;
   patient?: Patient;
-  setPatient: Dispatch<SetStateAction<Patient | {}>>;
+  setPatient: Dispatch<SetStateAction<Patient | undefined>>;
 }
 
 export const Form: FC<FormProps> = ({
@@ -81,30 +81,39 @@ export const Form: FC<FormProps> = ({
     }));
   };
 
-  const handleSubmit = () => {
-    const missingFields = Object.keys(data).filter(
+  const checkMissingFields = (data: Patient) => {
+    return Object.keys(data).filter(
       (key) => !data[key as keyof Patient] && key !== 'date'
     );
+  };
+
+  const updatePatientList = (patients: Patient[], patient: Patient | undefined, newPatient: Patient) => {
+    if (patient) {
+      return patients.map((p) => (p.id === patient.id ? newPatient : p));
+    }
+    return [...patients, newPatient];
+  };
+
+  const handleSubmit = () => {
+    const missingFields = checkMissingFields(data);
 
     if (missingFields.length > 0) {
       Alert.alert('Error', 'Todos los campos son obligatorios');
-    } else {
-      const newPatient: Patient = {
-        ...data,
-      };
-      if (patient) {
-        setPatients(patients.map((p) => (p.id === patient.id ? newPatient : p)));
-      } else {
-        setPatients([...patients, newPatient]);
-      }
-      setModalVisible(false);
-      setPatient({});
+      return;
     }
+
+    const newPatient: Patient = { ...data };
+    const updatedPatients = updatePatientList(patients, patient, newPatient);
+
+    setPatients(updatedPatients);
+    setModalVisible(false);
+    setPatient(undefined);
   };
+
 
   const handleCancel = () => {
     setModalVisible(false);
-    setPatient({});
+    setPatient(undefined);
   };
 
   return (
@@ -183,7 +192,7 @@ export const Form: FC<FormProps> = ({
           </View>
           <Pressable style={styles.btnNewDate} onPress={handleSubmit}>
             <Text style={styles.btnNewDateText}>
-              {patient ? 'Actualizar paciente' : 'Agregar paciente'}
+              {patient ? 'Actualizar' : 'Agregar'} paciente
             </Text>
           </Pressable>
         </ScrollView>
