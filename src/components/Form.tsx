@@ -1,4 +1,4 @@
-import React, {Dispatch, FC, SetStateAction, useState} from 'react';
+import React, { Dispatch, FC, SetStateAction, useState, useEffect } from 'react';
 import {
   Text,
   Modal,
@@ -11,7 +11,9 @@ import {
   Alert,
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
+
 interface Patient {
+  id: number;
   patient: string;
   owner: string;
   phone: string;
@@ -25,6 +27,8 @@ interface FormProps {
   setModalVisible: Dispatch<SetStateAction<boolean>>;
   patients: Patient[];
   setPatients: Dispatch<SetStateAction<Patient[]>>;
+  patient?: Patient;
+  setPatient: Dispatch<SetStateAction<Patient | {}>>;
 }
 
 export const Form: FC<FormProps> = ({
@@ -32,22 +36,11 @@ export const Form: FC<FormProps> = ({
   setModalVisible,
   patients,
   setPatients,
+  patient,
+  setPatient,
 }) => {
-  const {
-    title,
-    titleBold,
-    container,
-    input,
-    field,
-    label,
-    containerDate,
-    btnNewDate,
-    btnNewDateText,
-    btnCalcel,
-    btnCalcelText,
-  } = styles;
-
   const [data, setData] = useState<Patient>({
+    id: Date.now(),
     patient: '',
     owner: '',
     phone: '',
@@ -56,16 +49,41 @@ export const Form: FC<FormProps> = ({
     symptoms: '',
   });
 
+  useEffect(() => {
+    if (patient) {
+      setData({
+        id: patient.id,
+        patient: patient.patient,
+        owner: patient.owner,
+        phone: patient.phone,
+        date: patient.date,
+        email: patient.email,
+        symptoms: patient.symptoms,
+      });
+    } else {
+      setData({
+        id: Date.now(),
+        patient: '',
+        owner: '',
+        phone: '',
+        date: new Date(),
+        email: '',
+        symptoms: '',
+      });
+    }
+
+  }, [modalVisible, patient]);
+
   const handleChange = (fieldName: keyof Patient) => (value: any) => {
-    setData(prevForm => ({
+    setData((prevForm) => ({
       ...prevForm,
-      [fieldName]: fieldName === 'date' ? new Date(value) : value, // Si es 'date', pasamos el objeto Date tal cual
+      [fieldName]: fieldName === 'date' ? new Date(value) : value,
     }));
   };
 
-  const handleDate = () => {
+  const handleSubmit = () => {
     const missingFields = Object.keys(data).filter(
-      key => !data[key as keyof Patient] && key !== 'date', // No validar 'date' por ser un objeto Date
+      (key) => !data[key as keyof Patient] && key !== 'date'
     );
 
     if (missingFields.length > 0) {
@@ -74,62 +92,76 @@ export const Form: FC<FormProps> = ({
       const newPatient: Patient = {
         ...data,
       };
-      setPatients([...patients, newPatient]);
+      if (patient) {
+        setPatients(patients.map((p) => (p.id === patient.id ? newPatient : p)));
+      } else {
+        setPatients([...patients, newPatient]);
+      }
       setModalVisible(false);
+      setPatient({});
     }
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+    setPatient({});
   };
 
   return (
     <Modal animationType="slide" visible={modalVisible}>
-      <SafeAreaView style={container}>
+      <SafeAreaView style={styles.container}>
         <ScrollView>
-          <Text style={title}>
-            Nueva <Text style={titleBold}>Cita</Text>
+          <Text style={styles.title}>
+            {patient ? 'Editar ' : 'Nueva '} <Text style={styles.titleBold}>Cita</Text>
           </Text>
-          <Pressable style={btnCalcel} onPress={() => setModalVisible(false)}>
-            <Text style={btnCalcelText}>X Cancelar</Text>
+          <Pressable style={styles.btnCalcel} onPress={handleCancel}>
+            <Text style={styles.btnCalcelText}>X Cancelar</Text>
           </Pressable>
-          <View style={field}>
-            <Text style={label}>Nombre paciente</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Nombre paciente</Text>
             <TextInput
-              style={input}
+              style={styles.input}
               placeholder="Nombre Paciente"
               placeholderTextColor={'#666'}
+              value={data.patient}
               onChangeText={handleChange('patient')}
             />
           </View>
-          <View style={field}>
-            <Text style={label}>Nombre Propietario</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Nombre Propietario</Text>
             <TextInput
-              style={input}
+              style={styles.input}
               placeholder="Nombre Propietario"
               placeholderTextColor={'#666'}
+              value={data.owner}
               onChangeText={handleChange('owner')}
             />
           </View>
-          <View style={field}>
-            <Text style={label}>Email</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Email</Text>
             <TextInput
-              style={input}
+              style={styles.input}
               placeholder="Email"
               placeholderTextColor={'#666'}
+              value={data.email}
               onChangeText={handleChange('email')}
             />
           </View>
-          <View style={field}>
-            <Text style={label}>Telefono Propietario</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Telefono Propietario</Text>
             <TextInput
-              style={input}
+              style={styles.input}
               placeholder="Telefono propietario"
               placeholderTextColor={'#666'}
               keyboardType="number-pad"
+              value={data.phone}
               onChangeText={handleChange('phone')}
               maxLength={10}
             />
           </View>
-          <View style={field}>
-            <Text style={label}>Fecha Alta</Text>
-            <View style={containerDate}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Fecha Alta</Text>
+            <View style={styles.containerDate}>
               <DatePicker
                 date={data.date}
                 locale="es"
@@ -137,19 +169,22 @@ export const Form: FC<FormProps> = ({
               />
             </View>
           </View>
-          <View style={field}>
-            <Text style={label}>Sintomas</Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Sintomas</Text>
             <TextInput
-              style={input}
+              style={styles.input}
               placeholder="Sintomas"
               placeholderTextColor={'#666'}
+              value={data.symptoms}
               onChangeText={handleChange('symptoms')}
               multiline
               numberOfLines={4}
             />
           </View>
-          <Pressable style={btnNewDate} onPress={handleDate}>
-            <Text style={btnNewDateText}>Agregar paciente</Text>
+          <Pressable style={styles.btnNewDate} onPress={handleSubmit}>
+            <Text style={styles.btnNewDateText}>
+              {patient ? 'Actualizar paciente' : 'Agregar paciente'}
+            </Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
@@ -158,7 +193,7 @@ export const Form: FC<FormProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: '#6D28D9', flex: 1, paddingBottom: 30},
+  container: { backgroundColor: '#6D28D9', flex: 1, paddingBottom: 30 },
   title: {
     fontSize: 20,
     fontWeight: '600',
@@ -166,9 +201,9 @@ const styles = StyleSheet.create({
     marginTop: 30,
     color: '#FFF',
   },
-  titleBold: {fontWeight: '900'},
-  field: {marginTop: 40, marginHorizontal: 30},
-  label: {color: '#FFF', marginBottom: 10, fontSize: 20, fontWeight: '600'},
+  titleBold: { fontWeight: '900' },
+  field: { marginTop: 40, marginHorizontal: 30 },
+  label: { color: '#FFF', marginBottom: 10, fontSize: 20, fontWeight: '600' },
   input: {
     backgroundColor: '#FFF',
     padding: 15,

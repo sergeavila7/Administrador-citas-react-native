@@ -1,8 +1,17 @@
-import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, Pressable, Modal} from 'react-native';
-import {Form} from './src/components/index';
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  Pressable,
+  Modal,
+  FlatList,
+} from 'react-native';
+import { Form } from './src/components/index';
+import Patient from './src/components/Patient';
 
 interface Patient {
+  id: number;
   patient: string;
   owner: string;
   phone: string;
@@ -10,16 +19,40 @@ interface Patient {
   email: string;
   symptoms: string;
 }
-
+const defaultPatient: Patient = {
+  id: 1,
+  patient: 'Rex', // Nombre del paciente
+  owner: 'Juan Pérez', // Nombre del dueño
+  phone: '123456789', // Teléfono del dueño
+  date: new Date(), // Fecha actual
+  email: 'juan@correo.com', // Correo del dueño
+  symptoms: 'Tos y fiebre', // Síntomas del paciente
+};
 const App = (): JSX.Element => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]); // Tipo explícito 'Patient[]'
+  const [modalVisible, setModalVisible] = useState<boolean>(false); // Tipo booleano para el modal
+  const [patients, setPatients] = useState<Patient[]>([defaultPatient]);
+  const [patient, setPatient] = useState<Patient>();
+  const {
+    container,
+    title,
+    titleBold,
+    btnNewDate,
+    btnTextNewDate,
+    notPatient,
+    list,
+  } = styles;
 
-  const {container, title, titleBold, btnNewDate, btnTextNewDate} = styles;
 
   const newDateHandler = () => {
     setModalVisible(true);
   };
+
+  const patientEdit = (id: number) => {
+    const patientEdit = patients.filter(patient => patient.id === id)
+    setPatient(patientEdit[0])
+    console.log('patient ....', patientEdit);
+
+  }
 
   return (
     <SafeAreaView style={container}>
@@ -28,11 +61,25 @@ const App = (): JSX.Element => {
       <Pressable onPress={newDateHandler} style={btnNewDate}>
         <Text style={btnTextNewDate}>Nueva Cita</Text>
       </Pressable>
+      {patients.length === 0 ? (
+        <Text style={notPatient}>No hay pacientes aún</Text>
+      ) : (
+        <FlatList
+          style={list}
+          data={patients}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }: { item: Patient }) => {
+            return <Patient item={item} patientEdit={patientEdit} setModalVisible={setModalVisible} />;
+          }}
+        />
+      )}
       <Form
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         patients={patients}
         setPatients={setPatients}
+        patient={patient}
+        setPatient={setPatient}
       />
     </SafeAreaView>
   );
@@ -69,6 +116,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     textTransform: 'uppercase',
+  },
+  notPatient: {
+    marginTop: 40,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+    color: 'black',
+  },
+  list: {
+    marginTop: 50,
+    marginHorizontal: 30,
   },
 });
 
