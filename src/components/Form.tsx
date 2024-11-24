@@ -123,8 +123,8 @@ export const Form: FC<FormProps> = ({
           <Text style={styles.title}>
             {patient ? 'Editar ' : 'Nueva '} <Text style={styles.titleBold}>Cita</Text>
           </Text>
-          <Pressable style={styles.btnCalcel} onPress={handleCancel}>
-            <Text style={styles.btnCalcelText}>X Cancelar</Text>
+          <Pressable style={styles.btnCancel} onPress={handleCancel}>
+            <Text style={styles.btnCancelText}>X Cancelar</Text>
           </Pressable>
           <View style={styles.field}>
             <Text style={styles.label}>Nombre paciente</Text>
@@ -222,14 +222,14 @@ const styles = StyleSheet.create({
   containerDate: {
     borderRadius: 10,
   },
-  btnCalcel: {
+  btnCancel: {
     backgroundColor: '#5827A4',
     marginTop: 15,
     paddingVertical: 15,
     marginHorizontal: 30,
     borderRadius: 10,
   },
-  btnCalcelText: {
+  btnCancelText: {
     color: '#FFF',
     textAlign: 'center',
     fontWeight: '700',

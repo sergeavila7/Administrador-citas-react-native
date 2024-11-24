@@ -8,8 +8,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import { Form } from './src/components/index';
-import Patient from './src/components/Patient';
+import { Form, InformationPatient, Patient } from './src/components/index';
 
 interface Patient {
   id: number;
@@ -22,15 +21,16 @@ interface Patient {
 }
 const defaultPatient: Patient = {
   id: 1,
-  patient: 'Rex', // Nombre del paciente
-  owner: 'Juan Pérez', // Nombre del dueño
-  phone: '123456789', // Teléfono del dueño
-  date: new Date(), // Fecha actual
-  email: 'juan@correo.com', // Correo del dueño
-  symptoms: 'Tos y fiebre', // Síntomas del paciente
+  patient: 'Rex',
+  owner: 'Juan Pérez',
+  phone: '123456789',
+  date: new Date(),
+  email: 'juan@correo.com',
+  symptoms: 'Tos y fiebre',
 };
 const App = (): JSX.Element => {
-  const [modalVisible, setModalVisible] = useState<boolean>(false); // Tipo booleano para el modal
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalPatient, setModalPatient] = useState<boolean>(false);
   const [patients, setPatients] = useState<Patient[]>([defaultPatient]);
   const [patient, setPatient] = useState<Patient>();
   const {
@@ -81,23 +81,41 @@ const App = (): JSX.Element => {
           data={patients}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }: { item: Patient }) => {
-            return <Patient
-              item={item}
-              patientEdit={patientEdit}
-              patientDelete={patientDelete}
-              setModalVisible={setModalVisible} />;
+            return (
+              <Patient
+                item={item}
+                patientEdit={patientEdit}
+                patientDelete={patientDelete}
+                setModalVisible={setModalVisible}
+                setModalPatient={setModalPatient}
+                setPatient={setPatient}
+              />
+            )
           }}
         />
       )}
-      <Form
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        patients={patients}
-        setPatients={setPatients}
-        patient={patient}
-        setPatient={setPatient}
-      />
-    </SafeAreaView>
+
+      {modalVisible && (
+        <Form
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          patients={patients}
+          setPatients={setPatients}
+          patient={patient}
+          setPatient={setPatient}
+        />
+      )}
+
+      <Modal
+        visible={modalPatient}
+        animationType='slide' >
+        <InformationPatient
+          patient={patient}
+          setPatient={setPatient}
+          setModalPatient={setModalPatient}
+        />
+      </Modal>
+    </SafeAreaView >
   );
 };
 
